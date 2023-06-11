@@ -1,13 +1,13 @@
 const express =require('express');
 const cors =require('cors');
-//const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 const app =express();
 const port = process.env.PORT || 5000;
 
 // middleWare
- //app.use(cors());
+ app.use(cors());
  app.use(express.json());
 
 const corsConfig = {
@@ -115,6 +115,22 @@ async function run() {
       res.send(result);
         
    })
+   // instructor
+   app.patch('/users/instructor/:id',async(req,res)=>{
+    const id = req.params.id;
+    console.log(id);
+    const filter = { _id: new ObjectId(id)};
+    const updateDoc ={
+        $set: {
+            role: 'instructor'
+          },
+    };
+    const result =await usersCollecton.updateOne(filter,updateDoc);
+    res.send(result);
+      
+ })
+
+
 
   //menu
     app.get('/menu',async(req,res)=>{
