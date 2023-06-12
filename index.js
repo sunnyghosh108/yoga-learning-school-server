@@ -19,22 +19,22 @@ const corsConfig = {
   app.options("", cors(corsConfig))
 
 // verifyJWT
-  // const verifyJWT =(req,res,next)=>{
-  //   const authorization =req.headers.authorization;
-  //   if(!authorization){
-  //       return res.status(401).send({error:true,message:'unauthorized access'});
-  //   }
+  const verifyJWT =(req,res,next)=> {
+    const authorization =req.headers.authorization;
+    if(!authorization){
+        return res.status(401).send({error:true,message:'unauthorized access'});
+    }
     //bearer token
-//     const token = authorization.split(' ')[1];
+    const token = authorization.split(' ')[1];
 
-//     jwt.verify(token,process.env.ACCESS_TOKEN_SECRET,(err,decoded)=>{
-//         if(err){
-//             return res.status(401).send({error:true,message:'unauthorized access'});
-//         }
-//         req.decoded = decoded;
-//         next();
-//     })
-// }
+    jwt.verify(token,process.env.ACCESS_TOKEN_SECRET,(err,decoded)=>{
+        if(err){
+            return res.status(401).send({error:true,message:'unauthorized access'});
+        }
+        req.decoded = decoded;
+        next();
+    })
+}
 
 
 
@@ -61,32 +61,33 @@ async function run() {
     const usersCollecton=client.db("summerCamp").collection("users");
     const menuCollecton=client.db("summerCamp").collection("menu");
     const instructorCollecton=client.db("summerCamp").collection("instructor");
+    const classCollecton=client.db("summerCamp").collection("classes");
 
 //Access token
-  //   app.post('/jwt',(req,res)=>{
-  //     const user = req.body;
-  //     const token = jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{
-  //         expiresIn:'5h'
-  //     })
-  //     res.send({token})
-  //  })
+    app.post('/jwt',(req,res)=>{
+      const user = req.body;
+      const token = jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{
+          expiresIn:'5h'
+      })
+      res.send({token})
+   })
 
    
      // Warning:use VerifyJWT before using VerifyAdmin
     
-    //  const verifyAdmin = async (req, res, next) => {
-    //   const email = req.decoded.email;
-    //   const query = { email: email }
-    //   const user = await usersCollection.findOne(query);
-    //   if (user?.role !== 'admin') {
-    //     return res.status(403).send({ error: true, message: 'forbidden message' });
-    //   }
-    //   next();
-    // }
+     const verifyAdmin = async (req, res, next) => {
+      const email = req.decoded.email;
+      const query = { email: email }
+      const user = await usersCollecton.findOne(query);
+      if (user?.role !== 'admin') {
+        return res.status(403).send({ error: true, message: 'forbidden message' });
+      }
+      next();
+    }
    
 
      //users related api
-     app.get('/users',async(req,res)=>{
+     app.get('/users',verifyJWT,async(req,res)=>{
       const result =await usersCollecton.find().toArray();
       res.send(result);
      })
@@ -102,6 +103,21 @@ async function run() {
       const  result= await usersCollecton.insertOne(user);
       res.send(result);
      });
+     //security layer verify jwt
+     
+
+     app.get('/users/admin/:email',verifyJWT,async(req,res)=>{
+      const email = req.params.email;
+     if(req.decoded.email !== email){
+      res.send({admin:false})
+     }
+      const query = {email:email}
+      const user = await usersCollecton.findOne(query);
+      const result = {admin : user?.role === 'admin'}
+      res.send(result);
+     })
+
+       //admin
      app.patch('/users/admin/:id',async(req,res)=>{
       const id = req.params.id;
       console.log(id);
@@ -143,7 +159,19 @@ async function run() {
         res.send(result);
       })
       
-  
+  //addClass
+
+  app.get('/classes',async(req,res)=>{
+    const cursor = classCollecton.find();
+    const result =await cursor.toArray();
+    res.send(result);
+  })
+  app.post('/classes',async(req,res)=>{
+    const newClass =req.body;
+    console.log(newClass);
+    const result =await classCollecton.insertOne(newClass);
+    res.send(result);
+  })
 
   
 
