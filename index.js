@@ -172,10 +172,100 @@ async function run() {
     const result =await classCollecton.insertOne(newClass);
     res.send(result);
   })
-
+//approve
+app.patch('/users/classes/:id',async(req,res)=>{
+  const id = req.params.id;
+  console.log(id);
+  const filter = { _id: new ObjectId(id)};
+  const updateDoc ={
+      $set: {
+          role: 'approve'
+        },
+  };
+  const result =await classCollecton.updateOne(filter,updateDoc);
+  res.send(result);
+    
+})
   
 
-  //  
+  //  denied
+//   app.patch('/users/classes/:id',async(req,res)=>{
+//     const id = req.params.id;
+//     console.log(id);
+//     const filter = { _id: new ObjectId(id)};
+//     const updateDoc ={
+//         $set: {
+//             role: 'denied'
+//           },
+//     };
+//     const result =await classCollecton.updateOne(filter,updateDoc);
+//     res.send(result);
+      
+//  })
+
+ //feedback
+//  app.patch('/users/classes/:id',async(req,res)=>{
+//   const id = req.params.id;
+//   console.log(id);
+//   const filter = { _id: new ObjectId(id)};
+//   const updateDoc ={
+//       $set: {
+//           role: 'feedback'
+//         },
+//   };
+//   const result =await classCollecton.updateOne(filter,updateDoc);
+//   res.send(result);
+    
+// })
+
+const { ObjectId } = require('bson');
+
+// Denied role
+app.patch('/users/classes/denied/:id', async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const objectId = new ObjectId(id);
+    
+    const filter = { _id: objectId };
+    const updateDoc = {
+      $set: {
+        role: 'denied',
+      },
+    };
+    const result = await classCollecton.updateOne(filter, updateDoc);
+    res.send(result);
+  } catch (error) {
+    console.error('Failed to make denied:', error);
+    // Handle the error appropriately (e.g., send an error response to the client)
+    res.status(400).send({ error: 'Invalid ID' });
+  }
+});
+
+// Feedback role
+app.patch('/users/classes/feedback/:id', async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const objectId = new ObjectId(id);
+
+    const filter = { _id: objectId };
+    const updateDoc = {
+      $set: {
+        role: 'feedback',
+      },
+    };
+    const result = await classCollecton.updateOne(filter, updateDoc);
+    res.send(result);
+  } catch (error) {
+    console.error('Failed to make feedback:', error);
+    // Handle the error appropriately (e.g., send an error response to the client)
+    res.status(400).send({ error: 'Invalid ID' });
+  }
+});
+
+
+
     
 
 
