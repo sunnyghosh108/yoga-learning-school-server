@@ -1,7 +1,7 @@
 const express =require('express');
 const cors =require('cors');
 const jwt = require('jsonwebtoken');
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { MongoClient, ServerApiVersion,ObjectId} = require('mongodb');
 require('dotenv').config()
 const app =express();
 const port = process.env.PORT || 5000;
@@ -62,6 +62,7 @@ async function run() {
     const menuCollecton=client.db("summerCamp").collection("menu");
     const instructorCollecton=client.db("summerCamp").collection("instructor");
     const classCollecton=client.db("summerCamp").collection("classes");
+    const cartCollecton=client.db("summerCamp").collection("cart");
 
 //Access token
     app.post('/jwt',(req,res)=>{
@@ -264,7 +265,15 @@ app.patch('/users/classes/feedback/:id', async (req, res) => {
   }
 });
 
+//cart  collection
+app.get('/classes/:id', async (req, res) => {
+  const id = req.params.id;
+  const query = { _id: new ObjectId(id) }
 
+
+  const result = await classCollecton.findOne(query);
+  res.send(result);
+})
 
     
 
