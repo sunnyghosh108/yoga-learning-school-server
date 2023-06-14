@@ -8,6 +8,8 @@ const port = process.env.PORT || 5000;
 
 // middleWare
  app.use(cors());
+
+ //
  app.use(express.json());
 
 const corsConfig = {
@@ -62,8 +64,8 @@ async function run() {
     const menuCollecton=client.db("summerCamp").collection("menu");
     const instructorCollecton=client.db("summerCamp").collection("instructor");
     const classCollecton=client.db("summerCamp").collection("classes");
-    const cartCollecton=client.db("summerCamp").collection("cart");
-
+    //const cartCollecton=client.db("summerCamp").collection("cart");
+    const paymentCollection = client.db("summerCamp").collection("payments");
 //Access token
     app.post('/jwt',(req,res)=>{
       const user = req.body;
@@ -266,14 +268,43 @@ app.patch('/users/classes/feedback/:id', async (req, res) => {
 });
 
 //cart  collection
+// app.get('/cart',async(req,res)=>{
+//   const item =await cartCollecton.find().toArray();
+//   res.send(result);
+// })
+// app.post('/cart', async (req, res) => {
+//   const item = req.body;
+//   console.log(item);
+
+//   const result = await cartCollecton.findOne(item);
+//   res.send(result);
+// })
+
+// Backend route to fetch class details by ID
+// app.get('/classes/:id', (req, res) => {
+//   const classId = req.params.id;
+//   // Use the classId to query the database and retrieve the class details
+//   Class.findById(classId)
+//     .then((classDetails) => {
+//       res.json(classDetails);
+//     })
+//     .catch((error) => {
+//       res.status(500).json({ error: 'Error fetching class details' });
+//     });
+// });
 app.get('/classes/:id', async (req, res) => {
-  const id = req.params.id;
-  const query = { _id: new ObjectId(id) }
+  const classId = req.params.id;
+  const result = await classCollecton.findOne({ _id: ObjectId(classId) });
+  if (result) {
+    res.send(result);
+  } else {
+    res.status(404).json({ error: 'Class not found' });
+  }
+});
 
 
-  const result = await classCollecton.findOne(query);
-  res.send(result);
-})
+
+
 
     
 
